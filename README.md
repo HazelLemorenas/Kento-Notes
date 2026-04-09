@@ -1,4 +1,4 @@
-# Nota
+# Kento Notes
 
 A minimalist note-taking app that runs as a single HTML file. No server, no install, no account — just open and write.
 

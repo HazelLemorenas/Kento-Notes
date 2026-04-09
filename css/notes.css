@@ -43,6 +43,24 @@
   }
   .wordmark { font-family: var(--serif); font-size: 16px; color: var(--ink); margin-right: 8px; }
   .wordmark span { color: var(--accent); }
+  .home-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px 4px 8px;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    color: var(--ink-muted);
+    background: transparent;
+    border: 1px solid var(--rule-strong);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all .15s;
+    margin-right: 6px;
+  }
+  .home-btn:hover { color: var(--ink); border-color: var(--ink-muted); background: var(--paper-warm); }
+  .home-btn .arrow { font-size: 13px; line-height: 1; }
   .topbar-spacer { flex: 1; }
   .mode-toggle {
     display: flex;
