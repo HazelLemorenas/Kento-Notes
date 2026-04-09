@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Nota — Notes that stay yours</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="../css/main.css">
+</head>
+<body>
+
+<nav>
+  <div class="inner">
+    <a href="#" class="wordmark">nota<span>.</span></a>
+    <ul class="nav-desktop">
+      <li><a href="#features">Features</a></li>
+      <li><a href="#how">How it works</a></li>
+      <li><a href="#pricing">Pricing</a></li>
+      <li><a href="../html/notes.html" class="nav-cta">Get started</a></li>
+    </ul>
+  </div>
+</nav>
+
+<main>
+  <section class="hero wrap">
+    <div class="hero-left">
+      <p class="kicker">Offline-first · E2E encrypted</p>
+      <h1>Write without<br><em>the noise.</em></h1>
+      <p class="hero-desc">
+        A notes app built around your thoughts — not a dashboard, not a database.
+        Markdown-native, encrypted before it leaves your device, available offline, always.
+      </p>
+      <div class="btn-row">
+        <a href="notes.html" class="btn btn-primary">Start writing — it's free</a>
+        <a href="#how" class="btn btn-ghost">See how it works</a>
+      </div>
+    </div>
+    <div class="hero-right">
+      <div class="editor-frame">
+        <div class="editor-bar">
+          <span class="dot dot-r"></span>
+          <span class="dot dot-y"></span>
+          <span class="dot dot-g"></span>
+          <span class="editor-title">meeting-notes.md</span>
+        </div>
+        <div class="editor-body">
+          <div class="line md-h1"># Q3 planning session</div>
+          <div class="line md-text" style="margin-top:4px;"><span class="md-tag">#work</span><span class="md-tag">#planning</span></div>
+          <div class="line md-h2">## Goals</div>
+          <div class="line md-text">Ship the new onboarding before <span class="md-bold">Aug 15</span>. Focus on reducing time-to-first-value from ~8 minutes down to under 2.</div>
+          <code class="md-code">const target = { ttpv: '&lt; 2 min', deadline: '2025-08-15' }</code>
+          <div class="line md-h2">## Next steps</div>
+          <div class="line md-text">— Redesign welcome screen<br>— A/B test copy variants<br>— Review analytics with Mara<span class="cursor"></span></div>
+        </div>
+        <div class="encrypt-badge">
+          <span>⚿</span>
+          end-to-end encrypted · syncing offline changes…
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="features wrap" id="features">
+    <p class="section-label">What makes nota different</p>
+    <div class="features-grid">
+      <div class="feat">
+        <p class="feat-num">01</p>
+        <p class="feat-title">Offline first, always</p>
+        <p class="feat-desc">Everything lives on your device first. Sync happens in the background when you're online — your notes never depend on a server being up.</p>
+      </div>
+      <div class="feat">
+        <p class="feat-num">02</p>
+        <p class="feat-title">Real Markdown</p>
+        <p class="feat-desc">Not a WYSIWYG with hidden markup. Plain Markdown that renders beautifully — export to <code>.md</code> anytime, no lock-in.</p>
+      </div>
+      <div class="feat">
+        <p class="feat-num">03</p>
+        <p class="feat-title">E2E encryption</p>
+        <p class="feat-desc">Your notes are encrypted on-device before sync. Not even we can read them. Zero-knowledge architecture with open-source crypto primitives.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="how wrap" id="how">
+    <div class="how-label">
+      <p>How it <span>works</span></p>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <span class="step-n">01</span>
+        <div class="step-content">
+          <h3>Write in plain Markdown</h3>
+          <p>Open a note and start typing. Use <code>#</code> for headings, <code>**bold**</code>, <code>- lists</code>. The editor stays out of your way — no toolbars, no menus.</p>
+        </div>
+      </div>
+      <div class="step">
+        <span class="step-n">02</span>
+        <div class="step-content">
+          <h3>Encrypted before it leaves</h3>
+          <p>When you save, nota encrypts your note with your key before touching the network. Your passphrase never leaves the device.</p>
+        </div>
+      </div>
+      <div class="step">
+        <span class="step-n">03</span>
+        <div class="step-content">
+          <h3>Syncs quietly in background</h3>
+          <p>Come back online and changes merge seamlessly across all your devices — with conflict resolution that prefers your latest edit.</p>
+        </div>
+      </div>
+      <div class="step">
+        <span class="step-n">04</span>
+        <div class="step-content">
+          <h3>Export anytime, own your data</h3>
+          <p>Export everything as <code>.md</code> files or a <code>.zip</code> archive. Your notes are yours — readable in any text editor, forever.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="pricing wrap" id="pricing">
+    <p class="section-label">Simple pricing</p>
+    <div class="plans">
+      <div class="plan">
+        <p class="plan-name">Free</p>
+        <p class="plan-price">$0</p>
+        <p class="plan-period">forever</p>
+        <ul class="plan-features">
+          <li>Unlimited local notes</li>
+          <li>Full Markdown support</li>
+          <li>E2E encryption</li>
+          <li>1 device sync</li>
+          <li>Export to .md / .zip</li>
+        </ul>
+        <a href="../html/notes.html" class="plan-btn">Start writing</a>
+      </div>
+      <div class="plan">
+        <p class="plan-name">Sync</p>
+        <p class="plan-price">$4</p>
+        <p class="plan-period">per month</p>
+        <ul class="plan-features">
+          <li>Everything in Free</li>
+          <li>Unlimited device sync</li>
+          <li>Version history — 90 days</li>
+          <li>Shared notebooks</li>
+          <li>Priority support</li>
+        </ul>
+        <a href="#" class="plan-btn">Get Sync</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <p>© 2025 Nota. All notes encrypted. All rights reserved.</p>
+  <nav>
+    <div class="inner">
+      <ul>
+        <li><a href="#">Privacy</a></li>
+        <li><a href="#">Source</a></li>
+        <li><a href="#">Twitter</a></li>
+      </ul>
+    </div>
+  </nav>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Nota</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --ink: #1a1917;
+    --ink-muted: #6b6860;
+    --ink-faint: #c0bdb6;
+    --paper: #f5f2ed;
+    --paper-warm: #edeae3;
+    --paper-card: #f9f7f3;
+    --accent: #2d5a27;
+    --accent-light: #d4e8d0;
+    --accent-muted: #4a7a43;
+    --rule: rgba(26,25,23,0.1);
+    --rule-strong: rgba(26,25,23,0.18);
+    --danger: #c0392b;
+    --mono: 'DM Mono', monospace;
+    --serif: 'DM Serif Display', serif;
+    --sidebar-w: 240px;
+  }
+
+  html, body { height: 100%; overflow: hidden; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--mono);
+    font-size: 13px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── topbar ── */
+  .topbar {
+    height: 44px;
+    border-bottom: 1px solid var(--rule);
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
+    gap: 12px;
+    flex-shrink: 0;
+    background: var(--paper);
+    z-index: 10;
+  }
+  .wordmark { font-family: var(--serif); font-size: 16px; color: var(--ink); margin-right: 8px; }
+  .wordmark span { color: var(--accent); }
+  .home-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px 4px 8px;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    color: var(--ink-muted);
+    background: transparent;
+    border: 1px solid var(--rule-strong);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all .15s;
+    margin-right: 6px;
+  }
+  .home-btn:hover { color: var(--ink); border-color: var(--ink-muted); background: var(--paper-warm); }
+  .home-btn .arrow { font-size: 13px; line-height: 1; }
+  .topbar-spacer { flex: 1; }
+  .mode-toggle {
+    display: flex;
+    border: 1px solid var(--rule-strong);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .mode-btn {
+    padding: 4px 12px;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    color: var(--ink-muted);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    transition: all .15s;
+  }
+  .mode-btn.active { background: var(--ink); color: var(--paper); }
+  .mode-btn:not(.active):hover { background: var(--paper-warm); }
+  .encrypt-pill {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 10px;
+    color: var(--accent-muted);
+    background: var(--accent-light);
+    padding: 3px 10px;
+    border-radius: 20px;
+    letter-spacing: 0.04em;
+  }
+
+  /* ── layout ── */
+  .app {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+  }
+
+  /* ── sidebar ── */
+  .sidebar {
+    width: var(--sidebar-w);
+    border-right: 1px solid var(--rule);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    background: var(--paper-warm);
+    overflow: hidden;
+  }
+  .sidebar-head {
+    padding: 12px;
+    border-bottom: 1px solid var(--rule);
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  .search-input {
+    flex: 1;
+    background: var(--paper);
+    border: 1px solid var(--rule-strong);
+    border-radius: 4px;
+    padding: 5px 10px;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--ink);
+    outline: none;
+    transition: border-color .15s;
+  }
+  .search-input:focus { border-color: var(--accent); }
+  .search-input::placeholder { color: var(--ink-faint); }
+  .new-btn {
+    width: 28px; height: 28px;
+    border-radius: 4px;
+    background: var(--ink);
+    border: none;
+    color: var(--paper);
+    font-size: 18px;
+    line-height: 1;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background .15s;
+    flex-shrink: 0;
+  }
+  .new-btn:hover { background: var(--accent); }
+  .notes-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 6px;
+  }
+  .notes-list::-webkit-scrollbar { width: 4px; }
+  .notes-list::-webkit-scrollbar-thumb { background: var(--ink-faint); border-radius: 2px; }
+  .note-item {
+    padding: 10px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background .1s;
+    margin-bottom: 2px;
+    border: 1px solid transparent;
+  }
+  .note-item:hover { background: var(--paper-card); }
+  .note-item.active { background: var(--paper); border-color: var(--rule-strong); }
+  .note-item-title {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--ink);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-bottom: 3px;
+  }
+  .note-item-preview {
+    font-size: 11px;
+    color: var(--ink-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .note-item-date {
+    font-size: 10px;
+    color: var(--ink-faint);
+    margin-top: 4px;
+  }
+  .empty-state {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--ink-faint);
+    font-size: 11px;
+    line-height: 1.8;
+  }
+
+  /* ── main editor area ── */
+  .main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: var(--paper-card);
+  }
+  .editor-topbar {
+    padding: 10px 20px;
+    border-bottom: 1px solid var(--rule);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-shrink: 0;
+  }
+  .note-title-input {
+    flex: 1;
+    background: transparent;
+    border: none;
+    font-family: var(--serif);
+    font-size: 20px;
+    color: var(--ink);
+    outline: none;
+    padding: 0;
+  }
+  .note-title-input::placeholder { color: var(--ink-faint); font-style: italic; }
+  .delete-btn {
+    padding: 4px 10px;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    color: var(--ink-muted);
+    background: transparent;
+    border: 1px solid var(--rule-strong);
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all .15s;
+  }
+  .delete-btn:hover { color: var(--danger); border-color: var(--danger); }
+  .save-indicator {
+    font-size: 10px;
+    color: var(--ink-faint);
+    letter-spacing: 0.04em;
+    min-width: 60px;
+    text-align: right;
+  }
+  .save-indicator.saved { color: var(--accent-muted); }
+
+  /* ── editor / preview panes ── */
+  .panes {
+    flex: 1;
+    display: flex;
+    overflow: hidden;
+  }
+  .pane {
+    flex: 1;
+    overflow-y: auto;
+    padding: 24px 28px;
+  }
+  .pane::-webkit-scrollbar { width: 4px; }
+  .pane::-webkit-scrollbar-thumb { background: var(--ink-faint); border-radius: 2px; }
+  .pane-divider {
+    width: 1px;
+    background: var(--rule);
+    flex-shrink: 0;
+  }
+  #editor {
+    width: 100%;
+    height: 100%;
+    background: transparent;
+    border: none;
+    outline: none;
+    resize: none;
+    font-family: var(--mono);
+    font-size: 13px;
+    line-height: 1.8;
+    color: var(--ink);
+    caret-color: var(--accent);
+  }
+  #editor::placeholder { color: var(--ink-faint); font-style: italic; }
+
+  /* ── markdown preview ── */
+  .preview { font-family: var(--mono); font-size: 13px; line-height: 1.8; color: var(--ink); }
+  .preview h1 { font-family: var(--serif); font-size: 26px; font-weight: 400; margin: 0 0 16px; color: var(--ink); line-height: 1.2; }
+  .preview h2 { font-family: var(--serif); font-size: 19px; font-weight: 400; margin: 24px 0 10px; color: var(--ink); }
+  .preview h3 { font-size: 14px; font-weight: 500; margin: 20px 0 8px; color: var(--ink); }
+  .preview p { margin: 0 0 12px; color: var(--ink-muted); }
+  .preview strong { font-weight: 500; color: var(--ink); }
+  .preview em { font-style: italic; color: var(--ink-muted); }
+  .preview code {
+    font-family: var(--mono);
+    font-size: 11px;
+    background: var(--paper-warm);
+    border: 1px solid var(--rule-strong);
+    padding: 1px 6px;
+    border-radius: 3px;
+    color: var(--accent-muted);
+  }
+  .preview pre {
+    background: var(--paper-warm);
+    border: 1px solid var(--rule-strong);
+    border-radius: 4px;
+    padding: 14px 16px;
+    overflow-x: auto;
+    margin: 12px 0;
+  }
+  .preview pre code { background: none; border: none; padding: 0; font-size: 12px; color: var(--ink-muted); }
+  .preview blockquote {
+    border-left: 2px solid var(--accent);
+    padding-left: 14px;
+    margin: 12px 0;
+    color: var(--ink-muted);
+    font-style: italic;
+  }
+  .preview ul, .preview ol { padding-left: 20px; margin: 8px 0 12px; color: var(--ink-muted); }
+  .preview li { margin-bottom: 4px; }
+  .preview a { color: var(--accent); }
+  .preview hr { border: none; border-top: 1px solid var(--rule-strong); margin: 24px 0; }
+  .preview table { width: 100%; border-collapse: collapse; font-size: 12px; margin: 12px 0; }
+  .preview th { border-bottom: 1px solid var(--rule-strong); padding: 6px 10px; text-align: left; color: var(--ink); font-weight: 500; }
+  .preview td { padding: 6px 10px; border-bottom: 1px solid var(--rule); color: var(--ink-muted); }
+
+  /* ── no-note state ── */
+  .no-note {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: var(--ink-faint);
+    gap: 12px;
+    padding: 40px 60px;
+  }
+  .no-note-icon { font-family: var(--serif); font-size: 48px; color: var(--rule-strong); }
+  .no-note > p { font-size: 12px; letter-spacing: 0.04em; }
+  .no-note button {
+    margin-top: 8px;
+    padding: 8px 20px;
+    background: var(--ink);
+    color: var(--paper);
+    border: none;
+    border-radius: 3px;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    cursor: pointer;
+    transition: background .15s;
+  }
+  .no-note button:hover { background: var(--accent); }
+  .features-strip {
+    display: flex;
+    gap: 2px;
+    width: 100%;
+    max-width: 640px;
+    margin-top: 32px;
+    border: 1px solid var(--rule-strong);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .feat-block {
+    flex: 1;
+    padding: 18px 16px;
+    background: var(--paper-warm);
+    border-right: 1px solid var(--rule);
+  }
+  .feat-block:last-child { border-right: none; }
+  .feat-num { font-size: 10px; color: var(--ink-faint); letter-spacing: 0.08em; margin-bottom: 8px; }
+  .feat-title { font-family: var(--serif); font-size: 14px; color: var(--ink); margin-bottom: 6px; line-height: 1.2; }
+  .feat-desc {
+    font-size: 11px;
+    color: var(--ink-muted);
+    line-height: 1.7;
+    outline: none;
+    background: transparent;
+    border: none;
+    width: 100%;
+    resize: none;
+    font-family: var(--mono);
+    cursor: text;
+    padding: 0;
+  }
+  .feat-desc:focus { color: var(--ink); }
+
+  /* ── word count bar ── */
+  .statusbar {
+    height: 28px;
+    border-top: 1px solid var(--rule);
+    padding: 0 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    font-size: 10px;
+    color: var(--ink-faint);
+    letter-spacing: 0.04em;
+    flex-shrink: 0;
+  }
+  .statusbar span + span::before { content: '·'; margin-right: 16px; }
+
+  .help-btn {
+    padding: 4px 10px;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.06em;
+    color: var(--ink-muted);
+    background: transparent;
+    border: 1px solid var(--rule-strong);
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all .15s;
+  }
+  .help-btn:hover { color: var(--ink); border-color: var(--ink-muted); }
+  .help-btn.active { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+
+  .cheatsheet {
+    width: 260px;
+    border-left: 1px solid var(--rule);
+    background: var(--paper-warm);
+    overflow-y: auto;
+    flex-shrink: 0;
+    display: none;
+    flex-direction: column;
+  }
+  .cheatsheet.open { display: flex; }
+  .cheatsheet::-webkit-scrollbar { width: 4px; }
+  .cheatsheet::-webkit-scrollbar-thumb { background: var(--ink-faint); border-radius: 2px; }
+  .cs-head {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--rule);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+  .cs-section { padding: 12px 16px; border-bottom: 1px solid var(--rule); }
+  .cs-label { font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-faint); margin-bottom: 8px; }
+  .cs-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; gap: 8px; }
+  .cs-syntax {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--accent-muted);
+    background: var(--paper);
+    border: 1px solid var(--rule-strong);
+    padding: 1px 6px;
+    border-radius: 3px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .cs-result { font-size: 11px; color: var(--ink-muted); text-align: right; }
+
+  @media (max-width: 600px) {
+    :root { --sidebar-w: 180px; }
+    .encrypt-pill { display: none; }
+    .cheatsheet { width: 200px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <span class="wordmark">nota<span>.</span></span>
+  <button class="home-btn" onclick="window.location.href='../html/index.html'">
+    <span class="arrow">&#8592;</span> home
+  </button>
+  <div class="topbar-spacer"></div>
+  <div class="mode-toggle">
+    <button class="mode-btn active" id="btn-edit" onclick="setMode('edit')">edit</button>
+    <button class="mode-btn" id="btn-split" onclick="setMode('split')">split</button>
+    <button class="mode-btn" id="btn-preview" onclick="setMode('preview')">preview</button>
+  </div>
+  <div class="encrypt-pill">&#9679; encrypted locally</div>
+</div>
+
+<div class="app">
+  <aside class="sidebar">
+    <div class="sidebar-head">
+      <input class="search-input" id="search" type="text" placeholder="search notes…" oninput="renderList()" />
+      <button class="new-btn" onclick="newNote()" title="New note">+</button>
+    </div>
+    <div class="notes-list" id="notes-list"></div>
+  </aside>
+
+  <div class="main" id="main-area">
+    <div class="no-note" id="no-note">
+      <div class="no-note-icon">n</div>
+      <p>no note selected</p>
+      <button onclick="newNote()">+ new note</button>
+      <div class="features-strip">
+        <div class="feat-block">
+          <div class="feat-num">01</div>
+          <div class="feat-title">Offline first, always</div>
+          <textarea class="feat-desc" rows="4">Everything lives on your device first. Sync happens in the background when you're online — your notes never depend on a server being up.</textarea>
+        </div>
+        <div class="feat-block">
+          <div class="feat-num">02</div>
+          <div class="feat-title">Real Markdown</div>
+          <textarea class="feat-desc" rows="4">Not a WYSIWYG with hidden markup. Plain Markdown that renders beautifully — export to .md anytime, no lock-in.</textarea>
+        </div>
+        <div class="feat-block">
+          <div class="feat-num">03</div>
+          <div class="feat-title">E2E encryption</div>
+          <textarea class="feat-desc" rows="4">Your notes are encrypted on-device before sync. Not even we can read them. Zero-knowledge architecture with open-source crypto primitives.</textarea>
+        </div>
+      </div>
+    </div>
+
+    <div id="editor-area" style="display:none; flex-direction:column; flex:1; overflow:hidden;">
+      <div class="editor-topbar">
+        <input class="note-title-input" id="note-title" type="text" placeholder="untitled note…" oninput="onTitleChange()" />
+        <span class="save-indicator" id="save-indicator">—</span>
+        <button class="help-btn" id="help-btn" onclick="toggleCheatsheet()" title="Markdown cheatsheet">? md</button>
+        <button class="delete-btn" onclick="deleteNote()">delete</button>
+      </div>
+      <div class="panes" id="panes">
+        <div class="pane" id="edit-pane">
+          <textarea id="editor" placeholder="start writing…&#10;&#10;# heading&#10;**bold** _italic_ \`code\`&#10;- list item&#10;> blockquote" oninput="onEditorChange()"></textarea>
+        </div>
+        <div class="pane-divider" id="pane-divider"></div>
+        <div class="pane" id="preview-pane">
+          <div class="preview" id="preview"></div>
+        </div>
+        <div class="cheatsheet" id="cheatsheet">
+          <div class="cs-head">Markdown cheatsheet</div>
+          <div class="cs-section">
+            <div class="cs-label">Headings</div>
+            <div class="cs-row"><span class="cs-syntax"># Heading 1</span><span class="cs-result">largest</span></div>
+            <div class="cs-row"><span class="cs-syntax">## Heading 2</span><span class="cs-result">medium</span></div>
+            <div class="cs-row"><span class="cs-syntax">### Heading 3</span><span class="cs-result">smaller</span></div>
+          </div>
+          <div class="cs-section">
+            <div class="cs-label">Emphasis</div>
+            <div class="cs-row"><span class="cs-syntax">**bold**</span><span class="cs-result"><strong>bold</strong></span></div>
+            <div class="cs-row"><span class="cs-syntax">_italic_</span><span class="cs-result"><em>italic</em></span></div>
+            <div class="cs-row"><span class="cs-syntax">~~strike~~</span><span class="cs-result"><s>strike</s></span></div>
+          </div>
+          <div class="cs-section">
+            <div class="cs-label">Lists</div>
+            <div class="cs-row"><span class="cs-syntax">- item</span><span class="cs-result">bullet list</span></div>
+            <div class="cs-row"><span class="cs-syntax">1. item</span><span class="cs-result">numbered list</span></div>
+            <div class="cs-row"><span class="cs-syntax">- [ ] task</span><span class="cs-result">checkbox</span></div>
+          </div>
+          <div class="cs-section">
+            <div class="cs-label">Code</div>
+            <div class="cs-row"><span class="cs-syntax">`inline`</span><span class="cs-result">inline code</span></div>
+            <div class="cs-row"><span class="cs-syntax">```</span><span class="cs-result">code block</span></div>
+          </div>
+          <div class="cs-section">
+            <div class="cs-label">Other</div>
+            <div class="cs-row"><span class="cs-syntax">> quote</span><span class="cs-result">blockquote</span></div>
+            <div class="cs-row"><span class="cs-syntax">---</span><span class="cs-result">divider line</span></div>
+            <div class="cs-row"><span class="cs-syntax">[text](url)</span><span class="cs-result">link</span></div>
+            <div class="cs-row"><span class="cs-syntax">![alt](url)</span><span class="cs-result">image</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="statusbar">
+        <span id="stat-words">0 words</span>
+        <span id="stat-chars">0 chars</span>
+        <span id="stat-lines">0 lines</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const STORE_KEY = 'nota_notes_v1';
+let notes = [];
+let activeId = null;
+let saveTimer = null;
+let currentMode = 'edit';
+
+function load() {
+  try {
+    const raw = localStorage.getItem(STORE_KEY);
+    notes = raw ? JSON.parse(raw) : [];
+  } catch(e) { notes = []; }
+}
+
+function save() {
+  localStorage.setItem(STORE_KEY, JSON.stringify(notes));
+}
+
+function getNoteById(id) {
+  return notes.find(n => n.id === id);
+}
+
+function newNote() {
+  const note = {
+    id: Date.now().toString(),
+    title: '',
+    body: '',
+    updated: Date.now()
+  };
+  notes.unshift(note);
+  save();
+  renderList();
+  openNote(note.id);
+  setTimeout(() => document.getElementById('note-title').focus(), 50);
+}
+
+function openNote(id) {
+  activeId = id;
+  const note = getNoteById(id);
+  if (!note) return;
+
+  document.getElementById('no-note').style.display = 'none';
+  const ea = document.getElementById('editor-area');
+  ea.style.display = 'flex';
+
+  document.getElementById('note-title').value = note.title;
+  document.getElementById('editor').value = note.body;
+  updatePreview(note.body);
+  updateStats(note.body);
+  setSaveIndicator('saved');
+  renderList();
+}
+
+function onTitleChange() {
+  const note = getNoteById(activeId);
+  if (!note) return;
+  note.title = document.getElementById('note-title').value;
+  note.updated = Date.now();
+  scheduleSave();
+  renderList();
+}
+
+function onEditorChange() {
+  const note = getNoteById(activeId);
+  if (!note) return;
+  const val = document.getElementById('editor').value;
+  note.body = val;
+  note.updated = Date.now();
+  updatePreview(val);
+  updateStats(val);
+  scheduleSave();
+  renderList();
+}
+
+function scheduleSave() {
+  setSaveIndicator('saving…');
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => {
+    save();
+    setSaveIndicator('saved');
+  }, 600);
+}
+
+function setSaveIndicator(text) {
+  const el = document.getElementById('save-indicator');
+  el.textContent = text;
+  el.className = 'save-indicator' + (text === 'saved' ? ' saved' : '');
+}
+
+function deleteNote() {
+  if (!activeId) return;
+  if (!confirm('Delete this note?')) return;
+  notes = notes.filter(n => n.id !== activeId);
+  save();
+  activeId = null;
+  document.getElementById('no-note').style.display = 'flex';
+  document.getElementById('editor-area').style.display = 'none';
+  renderList();
+}
+
+function updatePreview(md) {
+  const html = typeof marked !== 'undefined' ? marked.parse(md || '') : md;
+  document.getElementById('preview').innerHTML = html;
+}
+
+function updateStats(text) {
+  const words = text.trim() ? text.trim().split(/\s+/).length : 0;
+  const chars = text.length;
+  const lines = text ? text.split('\n').length : 0;
+  document.getElementById('stat-words').textContent = words + ' word' + (words !== 1 ? 's' : '');
+  document.getElementById('stat-chars').textContent = chars + ' char' + (chars !== 1 ? 's' : '');
+  document.getElementById('stat-lines').textContent = lines + ' line' + (lines !== 1 ? 's' : '');
+}
+
+function setMode(mode) {
+  currentMode = mode;
+  ['edit','split','preview'].forEach(m => {
+    document.getElementById('btn-' + m).classList.toggle('active', m === mode);
+  });
+  const ep = document.getElementById('edit-pane');
+  const pp = document.getElementById('preview-pane');
+  const div = document.getElementById('pane-divider');
+  if (mode === 'edit') {
+    ep.style.display = 'flex'; pp.style.display = 'none'; div.style.display = 'none';
+  } else if (mode === 'preview') {
+    ep.style.display = 'none'; pp.style.display = 'flex'; div.style.display = 'none';
+  } else {
+    ep.style.display = 'flex'; pp.style.display = 'flex'; div.style.display = 'block';
+  }
+}
+
+function toggleCheatsheet() {
+  const cs = document.getElementById('cheatsheet');
+  const btn = document.getElementById('help-btn');
+  const open = cs.classList.toggle('open');
+  btn.classList.toggle('active', open);
+}
+
+function renderList() {
+  const q = document.getElementById('search').value.toLowerCase();
+  const list = document.getElementById('notes-list');
+  const filtered = notes.filter(n =>
+    !q || n.title.toLowerCase().includes(q) || n.body.toLowerCase().includes(q)
+  );
+
+  if (filtered.length === 0) {
+    list.innerHTML = '<div class="empty-state">no notes yet<br>press + to create one</div>';
+    return;
+  }
+
+  list.innerHTML = filtered.map(n => {
+    const preview = n.body.replace(/[#*`_>]/g, '').trim().slice(0, 60) || 'empty note';
+    const date = new Date(n.updated).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    const title = n.title || 'untitled';
+    return `<div class="note-item ${n.id === activeId ? 'active' : ''}" onclick="openNote('${n.id}')">
+      <div class="note-item-title">${esc(title)}</div>
+      <div class="note-item-preview">${esc(preview)}</div>
+      <div class="note-item-date">${date}</div>
+    </div>`;
+  }).join('');
+}
+
+function esc(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+load();
+renderList();
+setMode('edit');
+</script>
+</body>
+</html>
